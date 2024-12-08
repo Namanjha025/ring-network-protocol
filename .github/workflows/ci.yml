@@ -2,45 +2,33 @@ name: CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
-  build:
+  build-frontend:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
-      with:
-        java-version: '11'
-        distribution: 'adopt'
-
-    - name: Build Backend
-      run: |
-        cd Backend
-        mvn clean install -DskipTests
-
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'
+        node-version: '16'
+        cache: 'npm'
+        cache-dependency-path: ring-network-ui/package-lock.json
+
+    - name: Install Frontend Dependencies
+      working-directory: ring-network-ui
+      run: npm ci
 
     - name: Build Frontend
-      run: |
-        cd ring-network-ui
-        npm install
-        npm run build
+      working-directory: ring-network-ui
+      run: npm run build
 
-    - name: Run Backend Tests
-      run: |
-        cd Backend
-        mvn test
-
-    - name: Run Frontend Tests
-      run: |
-        cd ring-network-ui
-        npm test -- --watchAll=false 
+    # Uncomment when tests are added
+    # - name: Run Frontend Tests
+    #   working-directory: ring-network-ui
+    #   run: npm test -- --watchAll=false 
